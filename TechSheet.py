@@ -83,5 +83,5 @@ with gr.Blocks() as server:
     fetch_button.click(get_plan, inputs = plan_dropdown, outputs =  [text_area, plan_dropdown, fetch_button])
 
 
-server.launch(show_api=False)
+server.launch(show_api=Fals, server_name="0.0.0.0")
 
