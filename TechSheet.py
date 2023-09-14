@@ -51,6 +51,7 @@ def get_plan(plan):
     r = session.get(f"{base}/service_types/{type_id}/plans/{plan_id}/items", auth=auth, params={'include': 'item_notes'} )
     text = f"<table style='{style}'></table>"
     inner_text = ""
+    linked = []
     for item in r.json()['data']:
         url = get_url(item)
         av_note = ""
@@ -62,8 +63,13 @@ def get_plan(plan):
         description = item['attributes']['description'] if 'description' in item['attributes'] and item['attributes']['description'] is not None else ""
         title = item['attributes']['title']
         title = title + (f" - <a href=\"{url}\">link</a>" if url else "")
+        if (url):
+            linked.append(title)
         inner_text = f"{inner_text}<tr><td style='width:40%; {style}'>{title}</td><td style='{style}'>{av_note}</td><td style='width:40%; {style}'>{description}</td></tr>"
         text = f"<table style='font-size:12pt'>{inner_text}</table>"
+    if (linked):
+        text += f"<hr/>"
+        text += "".join([f"<span style='{style}'>{text}</span><br/>" for text in linked])
     return [text, gr.update(visible=False), gr.update(visible=False), ]
 
 style = "font-size:14px; padding: 2px; background-color:white; color:black;"
