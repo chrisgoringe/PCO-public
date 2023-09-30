@@ -42,7 +42,10 @@ def get_item_av(type_id, plan_id, item_id, item_note_id):
 def get_url(item):
     r2 = session.get(item['links']['self']+"/attachments", auth=auth ).json()
     for att in r2['data']:
-        return att['attributes']['remote_link'][:-1]+"0"
+        try:
+            return att['attributes']['remote_link'][:-1]+"0" 
+        except:
+            pass
     return None
 
 def get_plan(plan):
