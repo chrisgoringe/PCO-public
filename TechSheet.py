@@ -72,7 +72,7 @@ def get_plan(plan):
         text = f"<table style='font-size:12pt'>{inner_text}</table>"
     if (linked):
         text += f"<hr/>"
-        text += "".join([f"<span style='{style}'>{text}</span><br/>" for text in linked])
+        text += "<div>" + "".join([f"<span style='{style}'>{text}</span><br/>" for text in linked]) + "</div>"
     return [text, gr.update(visible=False), gr.update(visible=False), ]
 
 style = "font-size:14px; padding: 2px; background-color:white; color:black;"
