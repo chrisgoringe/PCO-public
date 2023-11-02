@@ -30,7 +30,7 @@ def get_plans(type):
         title = f"{title} {e['attributes']['short_dates']}" if title is not None else e['attributes']['short_dates']
         plans[title] = e['id']
     return [gr.update(label="Now select the service", choices=list(plans), visible=True, value=list(plans)[0]), 
-            gr.update(visible=True), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), ]
+            gr.update(visible=True), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), ]
 
 def get_item_av(type_id, plan_id, item_id, item_note_id):
     r = session.get(f"{base}/service_types/{type_id}/plans/{plan_id}/items/{item_id}/item_notes/{item_note_id}", auth=auth)
@@ -48,7 +48,7 @@ def get_url(item):
             pass
     return None
 
-def get_plan(plan):
+def get_plan(plan, show_links):
     global plan_id, type_id, plans, type_id
     plan_id = plans[plan]
     r = session.get(f"{base}/service_types/{type_id}/plans/{plan_id}/items", auth=auth, params={'include': 'item_notes'} )
@@ -56,7 +56,7 @@ def get_plan(plan):
     inner_text = ""
     linked = []
     for item in r.json()['data']:
-        url = get_url(item)
+        url = get_url(item) if show_links else None
         av_note = ""
         for note in item['relationships']['item_notes']['data']:
             maybe_av_note = get_item_av(type_id, plan_id, item['id'], note['id'])
@@ -73,7 +73,7 @@ def get_plan(plan):
     if (linked):
         text += f"<hr/>"
         text += "<div>" + "".join([f"<span style='{style}'>{text}</span><br/>" for text in linked]) + "</div>"
-    return [text, gr.update(visible=False), gr.update(visible=False), ]
+    return [text, gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), ]
 
 style = "font-size:14px; padding: 2px; background-color:white; color:black;"
 
@@ -87,9 +87,10 @@ with gr.Blocks() as server:
     choose_button = gr.Button("Load services")
     plan_dropdown = gr.Dropdown([''], label="First choose the service type...", interactive = True, visible = False)
     fetch_button  = gr.Button("Load service details (takes about 10s)", visible = False)
+    show_links_check = gr.Checkbox(label="Show links", value=True, visible=False)
     text_area = gr.HTML("details will appear here", elem_id="results", visible=False)
-    choose_button.click(get_plans, inputs = type_dropdown, outputs = [plan_dropdown, fetch_button, text_area, type_dropdown, choose_button])
-    fetch_button.click(get_plan, inputs = plan_dropdown, outputs =  [text_area, plan_dropdown, fetch_button])
+    choose_button.click(get_plans, inputs = type_dropdown, outputs = [plan_dropdown, fetch_button, text_area, type_dropdown, choose_button, show_links_check])
+    fetch_button.click(get_plan, inputs = [plan_dropdown, show_links_check], outputs =  [text_area, plan_dropdown, fetch_button, show_links_check])
 
 
 server.launch(show_api=False, server_name="0.0.0.0")
