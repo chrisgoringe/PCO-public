@@ -115,7 +115,7 @@ def get_plan(plan, form):
         lines[i] = txt
 
     text = "\n".join([l for l in lines if l])
-    if form=='Standard Printable':
+    if form not in ['Just music', 'Just links']:
         text = "<table>" + text + '</table>'
 
     return [text, gr.update(visible=False), gr.update(visible=False), gr.update(visible=False),]
