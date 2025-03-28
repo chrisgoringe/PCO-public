@@ -65,9 +65,10 @@ class Line:
         self.description = ""
         self.av_note = ""
         self.url = ""
+        self.form = 0
         for i, f in enumerate(formats):
             if form == f: self.form = i
-        assert hasattr(self, 'form')
+
 
     @property
     def include(self): 
