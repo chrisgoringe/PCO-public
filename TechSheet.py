@@ -1,8 +1,16 @@
+from pathlib import Path
 import gradio as gr
-
+import os
 import json, threading, queue
 import requests
 from requests.auth import HTTPBasicAuth
+
+ASSETS = os.path.join(Path.cwd().absolute(),"assets")
+CSS = os.path.join(ASSETS,"ts.css")
+gr.set_static_paths(paths=[ASSETS,])
+
+
+
 
 session = requests.session()
 
@@ -48,16 +56,15 @@ def get_url(item):
             pass
     return None
 
-style = 'font-size:14px; padding: 2px; background-color:white; color:black;'
 musics:list[str] = [
     "TiS", "Reflection", "postlude", "Countdown", "TIS"
 ]
 
 class Line:
     FORMATS:list[str] = [
-        "<tr><td style='width:40%; "+style+"'>{0}</td><td style='"+style+"'>{2}</td><td style='width:40%; "+style+"'>{1}</td></tr>",
-        "<p style='"+style+"'>{0}</p>",
-        "<a style='"+style+"' href='{3}'>{0}</a><br/>",
+        "<tr><td style='width:40%;'>{0}</td><td>{2}</td><td style='width:40%;'>{1}</td></tr>",
+        "<p>{0}</p>",
+        "<a href='{3}'>{0}</a><br/>",
     ]
 
     def __init__(self, form):
@@ -126,9 +133,9 @@ type_id = None
 plan_id = None
 formats = ['Standard Printable', 'Just music', 'Just links']
 
+theme = gr.themes.Default().set(body_background_fill='white', body_text_size=gr.themes.sizes.text_sm)
 
-
-with gr.Blocks() as server:
+with gr.Blocks(css_paths=[CSS,], theme=theme) as server:
     type_dropdown = gr.Dropdown(list(service_types), label="Choose service type", value="Morning Service")
     choose_button = gr.Button("Load services")
     plan_dropdown = gr.Dropdown([''], label="First choose the service type...", interactive = True, visible = False)
