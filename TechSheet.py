@@ -9,12 +9,9 @@ ASSETS = os.path.join(Path.cwd().absolute(),"assets")
 CSS = os.path.join(ASSETS,"ts.css")
 gr.set_static_paths(paths=[ASSETS,])
 
-
-
-
 session = requests.session()
 
-with open("auth.json") as f:
+with open(Path(__file__).parent/"auth.json") as f:
     params = json.load(f)
 
 auth = HTTPBasicAuth(params['user'],params['pass'])
@@ -37,8 +34,15 @@ def get_plans(type):
         title = e['attributes']['title']
         title = f"{title} {e['attributes']['short_dates']}" if title is not None else e['attributes']['short_dates']
         plans[title] = e['id']
-    return [gr.update(label="Now select the service", choices=list(plans), visible=True, value=list(plans)[0]), 
-            gr.update(visible=True), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True),]
+    titles = list(p for p in plans)
+    return [
+        gr.update(label="Now select the service", choices=titles, visible=True, value=titles[0]), 
+        gr.update(visible=True), 
+        gr.update(visible=True), 
+        gr.update(visible=False), 
+        gr.update(visible=False), 
+        gr.update(visible=True),
+    ]# [plan_dropdown, fetch_button, text_area, type_dropdown, choose_button, format_dropdown]
 
 def get_item_av(type_id, plan_id, item_id, item_note_id):
     r = session.get(f"{base}/service_types/{type_id}/plans/{plan_id}/items/{item_id}/item_notes/{item_note_id}", auth=auth)
@@ -71,7 +75,7 @@ class Line:
         self.title = ""
         self.description = ""
         self.av_note = ""
-        self.url = ""
+        self.url:str|None = ""
         self.form = 0
         for i, f in enumerate(formats):
             if form == f: self.form = i
@@ -135,10 +139,10 @@ formats = ['Standard Printable', 'Just music', 'Just links']
 
 theme = gr.themes.Default().set(body_background_fill='white', body_text_size=gr.themes.sizes.text_sm)
 
-with gr.Blocks(css_paths=[CSS,], theme=theme) as server:
+with gr.Blocks() as server:
     type_dropdown = gr.Dropdown(list(service_types), label="Choose service type", value="Morning Service")
     choose_button = gr.Button("Load services")
-    plan_dropdown = gr.Dropdown([''], label="First choose the service type...", interactive = True, visible = False)
+    plan_dropdown = gr.Dropdown([''], label="First choose the service type...", interactive = True, visible = True)
     format_dropdown = gr.Dropdown(formats, label="Format", interactive = True, visible = False)
     fetch_button  = gr.Button("Load service details", visible = False)
     text_area = gr.HTML("details will appear here", elem_id="results", visible=False)
@@ -146,5 +150,5 @@ with gr.Blocks(css_paths=[CSS,], theme=theme) as server:
     fetch_button.click(get_plan, inputs = [plan_dropdown, format_dropdown], outputs =  [text_area, plan_dropdown, fetch_button, format_dropdown])
 
 
-server.launch(show_api=False, server_name="0.0.0.0")
+server.launch(server_name="0.0.0.0", css_paths=[CSS,], theme=theme)
 
